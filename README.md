@@ -10,7 +10,7 @@ An example configuration file is provided [here](./examples/config.toml).
 ## Deployment
 
 A container image is published.
-Us it however you like.
+Use it however you like.
 
 e.g. via Podman:
 ```sh
