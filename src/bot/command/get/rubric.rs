@@ -19,6 +19,7 @@ impl BotCommand for Rubric {
         dapnet: dapnet_api::Client,
         _: Config,
     ) -> Result<TextMessageEventContent> {
+        // TODO: also get news
         match dapnet.get_rubric(&self.name).await? {
             Some(rubric) => Ok(TextMessageEventContent::markdown(format!(
                 "**Rubric** {}<br>\
