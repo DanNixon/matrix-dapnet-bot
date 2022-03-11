@@ -1,4 +1,4 @@
-use super::BotCommand;
+use super::{utils, BotCommand};
 use crate::{Callsign, Config};
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
@@ -28,26 +28,6 @@ pub(crate) struct Send {
     message: Vec<String>,
 }
 
-fn get_transmit_callsign<'a>(
-    sender: &'a UserId,
-    config: &'a Config,
-    requested_callsign: &'a Option<Callsign>,
-) -> Result<&'a Callsign> {
-    match requested_callsign {
-        Some(callsign) => match config.check_user_can_transmit(sender, callsign) {
-            Some(_) => Ok(callsign),
-            None => Err(anyhow! {"{} is not permitted to use callsign {}", sender, callsign}),
-        },
-        None => match config.get_user(sender) {
-            Some(user) => match user.get_default_callsign() {
-                Some(callsign) => Ok(callsign),
-                None => Err(anyhow! {"{} has no configured callsigns", sender}),
-            },
-            None => Err(anyhow! {"{} is not a configured user", sender}),
-        },
-    }
-}
-
 #[async_trait]
 impl BotCommand for Send {
     async fn run_command(
@@ -57,7 +37,7 @@ impl BotCommand for Send {
         config: Config,
     ) -> Result<TextMessageEventContent> {
         let message = &self.message.join(" ");
-        let transmit_callsign = get_transmit_callsign(&sender, &config, &self.from)?;
+        let transmit_callsign = utils::get_transmit_callsign(&sender, &config, &self.from)?;
 
         if self.recipient.is_empty() {
             return Err(anyhow! {"At least one recipient must be specified"});

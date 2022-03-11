@@ -7,6 +7,8 @@ use serde::Deserialize;
 pub(crate) struct User {
     pub matrix_ids: Vec<UserId>,
     pub callsigns: Vec<Callsign>,
+    #[serde(default)]
+    pub dapnet_usernames: Vec<String>,
 }
 
 impl User {

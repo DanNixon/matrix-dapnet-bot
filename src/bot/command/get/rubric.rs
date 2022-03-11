@@ -3,6 +3,7 @@ use crate::Config;
 use anyhow::Result;
 use async_trait::async_trait;
 use clap::Parser;
+use itertools::Itertools;
 use matrix_sdk::ruma::{events::room::message::TextMessageEventContent, UserId};
 
 #[derive(Debug, Parser)]
@@ -19,20 +20,58 @@ impl BotCommand for Rubric {
         dapnet: dapnet_api::Client,
         _: Config,
     ) -> Result<TextMessageEventContent> {
-        // TODO: also get news
         match dapnet.get_rubric(&self.name).await? {
-            Some(rubric) => Ok(TextMessageEventContent::markdown(format!(
-                "**Rubric** {}<br>\
-                RIC: {}<br>\
-                Label: {}<br>\
-                Owner(s): {}<br>\
-                Transmitter group(s): {}",
-                rubric.name,
-                rubric.number,
-                rubric.label,
-                rubric.owners.join(", "),
-                rubric.transmitter_groups.join(", "),
-            ))),
+            Some(rubric) => {
+                let news = match dapnet.get_news(&rubric.name).await {
+                    Ok(news) => match news {
+                        Some(news) => news
+                            .iter()
+                            .map(|i| {
+                                format!(
+                                    "-{} {}{}{}",
+                                    match i.number {
+                                        Some(t) => format!(" ({})", t),
+                                        None => String::default(),
+                                    },
+                                    i.text,
+                                    match i.timestamp {
+                                        Some(t) => format!(" @ {}", t),
+                                        None => String::default(),
+                                    },
+                                    match &i.sender {
+                                        Some(t) => format!(" by {}", t),
+                                        None => String::default(),
+                                    }
+                                )
+                            })
+                            .join("\n"),
+                        None => {
+                            log::error! {"Failed to fetch news for rubric {}", rubric.name};
+                            "(failed to query news)".to_string()
+                        }
+                    },
+                    Err(e) => {
+                        log::error! {"Failed to fetch news for rubric {}: {}", rubric.name, e};
+                        "(failed to query news)".to_string()
+                    }
+                };
+
+                Ok(TextMessageEventContent::markdown(format!(
+                    "**Rubric** {}<br>\
+                    RIC: {}<br>\
+                    Label: {}<br>\
+                    Owner(s): {}<br>\
+                    Transmitter group(s): {}<br>\
+                    News:\n\
+                    {}",
+                    rubric.name,
+                    rubric.number,
+                    rubric.label,
+                    rubric.owners.join(", "),
+                    rubric.transmitter_groups.join(", "),
+                    news,
+                )))
+            }
             None => Ok(TextMessageEventContent::plain(format!(
                 "Rubric \"{}\" not found.",
                 &self.name,

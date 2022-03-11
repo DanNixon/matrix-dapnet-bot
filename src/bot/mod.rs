@@ -55,6 +55,9 @@ enum Subcommand {
 
     /// Send calls/messages
     Send(command::Send),
+
+    /// Send rubric news/content
+    SendNews(command::SendNews),
 }
 
 #[async_trait]
@@ -72,6 +75,7 @@ impl BotCommand for Subcommand {
             Subcommand::Get(c) => c.run_command(sender, dapnet, config).await,
             Subcommand::Stats(c) => c.run_command(sender, dapnet, config).await,
             Subcommand::Send(c) => c.run_command(sender, dapnet, config).await,
+            Subcommand::SendNews(c) => c.run_command(sender, dapnet, config).await,
         }
     }
 }
