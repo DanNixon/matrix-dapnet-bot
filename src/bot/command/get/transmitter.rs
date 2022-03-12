@@ -20,23 +20,49 @@ impl BotCommand for Transmitter {
         _: Config,
     ) -> Result<TextMessageEventContent> {
         match dapnet.get_transmitter(&self.name).await? {
-            // TODO: all info
             Some(transmitter) => Ok(TextMessageEventContent::markdown(format!(
                 "**Transmitter** {}<br>\
-                Status: {:?}<br>\
-                Timeslots: {}<br>\
-                Device: {:?} (version {:?})<br>\
-                Usage: {:?}<br>\
                 Owner(s): {}<br>\
-                (this response is a WIP)
-                ",
+                Usage: {:?}<br>\
+                Timeslots: {}<br>\
+                Status:<br>\
+                - {:?}<br>\
+                - Calls: {}<br>\
+                - Last update: {:?}<br>\
+                - Last connected: {:?}<br>\
+                - Connected since: {:?}<br>\
+                Device:<br>\
+                - Type: {}<br>\
+                - Version: {}<br>\
+                - Tx power: {}W<br>\
+                Antenna:<br>\
+                - Height above ground: {}m<br>\
+                - Type: {:?}<br>\
+                - Direction: {}<br>\
+                - Gain: {}dBi<br>\
+                [Location](https://www.openstreetmap.org/#map=18/{}/{})",
                 transmitter.name,
-                transmitter.status,
-                transmitter.timeslots,
-                transmitter.device_type,
-                transmitter.device_version,
-                transmitter.usage,
                 transmitter.owners.join(", "),
+                transmitter.usage,
+                transmitter.timeslots,
+                transmitter.status,
+                transmitter.call_count,
+                transmitter.last_update,
+                transmitter.last_connected,
+                transmitter.connected_since,
+                transmitter
+                    .device_type
+                    .unwrap_or_else(|| "(unknown)".to_string()),
+                transmitter
+                    .device_version
+                    .unwrap_or_else(|| "(unknown)".to_string()),
+                transmitter.power,
+                transmitter.antenna_height_above_ground,
+                transmitter.antenna_type,
+                transmitter.antenna_direction,
+                transmitter.antenna_gain,
+                transmitter.latitude,
+                transmitter.longitude,
             ))),
             None => Ok(TextMessageEventContent::plain(format!(
                 "Transmitter \"{}\" not found.",
