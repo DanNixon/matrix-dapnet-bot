@@ -14,6 +14,10 @@ pub(crate) struct SendNews {
     #[clap(long, short)]
     from: Option<Callsign>,
 
+    /// News item number (1-10) (mainly for Skyper pagers)
+    #[clap(long, short, default_value = "1")]
+    number: i8,
+
     /// Name of the rubric to publish news to
     rubric: String,
 
@@ -29,7 +33,11 @@ fn check_user_can_send_to_rubric(sender: &UserId, config: &Config, rubric: &Rubr
     if user_usernames.intersection(&allowed_usernames).count() > 0 {
         Ok(())
     } else {
-        Err(anyhow! {"User {} is not permitted to send to rubric {}", sender, rubric.name })
+        Err(anyhow!(
+            "User {} is not permitted to send to rubric {}",
+            sender,
+            rubric.name
+        ))
     }
 }
 
@@ -47,21 +55,30 @@ impl BotCommand for SendNews {
         let rubric = match dapnet.get_rubric(&self.rubric).await? {
             Some(r) => r,
             None => {
-                return Err(anyhow! {"Could not find rubric with name \"{}\"", self.rubric});
+                return Err(anyhow!(
+                    "Could not find rubric with name \"{}\"",
+                    self.rubric
+                ));
             }
         };
 
         check_user_can_send_to_rubric(&sender, &config, &rubric)?;
 
-        log::info! {"Request to send news: \"{}\" to rubric {} from {}, with options: {:?}", message, rubric.name, transmit_callsign, &self};
+        log::info!(
+            "Request to send news: \"{}\" to rubric {} from {}, with options: {:?}",
+            message,
+            rubric.name,
+            transmit_callsign,
+            &self
+        );
 
-        match dapnet
-            .new_news(&News::new(
-                rubric.name.clone(),
-                format!("{}: {}", transmit_callsign, message),
-            ))
-            .await
-        {
+        let mut news = News::new(
+            rubric.name.clone(),
+            format!("{}: {}", transmit_callsign, message),
+        );
+        news.number = Some(self.number);
+
+        match dapnet.new_news(&news).await {
             Ok(()) => Ok(TextMessageEventContent::markdown(format!(
                 "{}, your news item has been sent to rubric {} ({})!",
                 sender, rubric.name, rubric.number,
