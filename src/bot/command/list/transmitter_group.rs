@@ -25,7 +25,7 @@ impl BotCommand for TransmitterGroup {
                     .collect::<Vec<String>>()
                     .join(", "),
             ))),
-            None => Err(anyhow! {"Failed to query transmitter groups"}),
+            None => Err(anyhow!("Failed to query transmitter groups")),
         }
     }
 }

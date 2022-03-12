@@ -14,9 +14,12 @@ pub(crate) struct User {
 impl User {
     pub(crate) fn check_can_transmit(&self, matrix_id: &UserId, callsign: &Callsign) -> Result<()> {
         if !self.callsigns.contains(callsign) {
-            Err(anyhow! {"Callsign \"{}\" unknown to this user", callsign})
+            Err(anyhow!("Callsign \"{}\" unknown to this user", callsign))
         } else if !self.matrix_ids.contains(matrix_id) {
-            Err(anyhow! {"Matrix user ID \"{}\" unknown to this user", matrix_id})
+            Err(anyhow!(
+                "Matrix user ID \"{}\" unknown to this user",
+                matrix_id
+            ))
         } else {
             Ok(())
         }

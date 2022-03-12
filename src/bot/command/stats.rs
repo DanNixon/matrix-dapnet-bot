@@ -36,7 +36,7 @@ impl BotCommand for Stats {
                 stats.nodes_total,
                 stats.users,
             ))),
-            None => Err(anyhow! {"Failed to query statistics"}),
+            None => Err(anyhow!("Failed to query statistics")),
         }
     }
 }

@@ -46,12 +46,12 @@ impl BotCommand for Rubric {
                             })
                             .join("\n"),
                         None => {
-                            log::error! {"Failed to fetch news for rubric {}", rubric.name};
+                            log::error!("Failed to fetch news for rubric {}", rubric.name);
                             "(failed to query news)".to_string()
                         }
                     },
                     Err(e) => {
-                        log::error! {"Failed to fetch news for rubric {}: {}", rubric.name, e};
+                        log::error!("Failed to fetch news for rubric {}: {}", rubric.name, e);
                         "(failed to query news)".to_string()
                     }
                 };

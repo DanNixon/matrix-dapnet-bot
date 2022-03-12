@@ -25,7 +25,7 @@ impl BotCommand for Node {
                     .collect::<Vec<String>>()
                     .join(", "),
             ))),
-            None => Err(anyhow! {"Failed to query nodes"}),
+            None => Err(anyhow!("Failed to query nodes")),
         }
     }
 }

@@ -40,10 +40,15 @@ impl BotCommand for Send {
         let transmit_callsign = utils::get_transmit_callsign(&sender, &config, &self.from)?;
 
         if self.recipient.is_empty() {
-            return Err(anyhow! {"At least one recipient must be specified"});
+            return Err(anyhow!("At least one recipient must be specified"));
         }
 
-        log::info! {"Request to send message: \"{}\" from {}, with options: {:?}", message, transmit_callsign, &self};
+        log::info!(
+            "Request to send message: \"{}\" from {}, with options: {:?}",
+            message,
+            transmit_callsign,
+            &self
+        );
 
         match dapnet
             .new_call(&Call::new(

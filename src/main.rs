@@ -116,9 +116,9 @@ async fn main() -> Result<()> {
     let dapnet_client = dapnet_api::Client::new(&args.dapnet_username, &args.dapnet_password);
 
     let config = Config::from_file(&args.config_file)?;
-    log::debug! {"Loaded configuration: {:?}", config};
+    log::debug!("Loaded configuration: {:?}", config);
 
-    log::info! {"Logging into Matrix..."};
+    log::info!("Logging into Matrix...");
     let matrix_user = UserId::try_from(args.matrix_username.clone())?;
     let matrix_client = matrix_sdk::Client::new_from_user_id(matrix_user.clone()).await?;
     matrix_client
@@ -130,7 +130,7 @@ async fn main() -> Result<()> {
         )
         .await?;
 
-    log::info! {"Performing initial sync..."};
+    log::info!("Performing initial sync...");
     matrix_client.sync_once(SyncSettings::default()).await?;
 
     matrix_client
@@ -149,7 +149,7 @@ async fn main() -> Result<()> {
         })
         .await;
 
-    log::info! {"Logged into Matrix"};
+    log::info!("Logged into Matrix");
     matrix_client
         .sync(SyncSettings::default().token(matrix_client.sync_token().await.unwrap()))
         .await;

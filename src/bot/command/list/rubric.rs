@@ -25,7 +25,7 @@ impl BotCommand for Rubric {
                     .collect::<Vec<String>>()
                     .join(", "),
             ))),
-            None => Err(anyhow! {"Failed to query rubrics"}),
+            None => Err(anyhow!("Failed to query rubrics")),
         }
     }
 }
