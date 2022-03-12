@@ -85,6 +85,7 @@ async fn handle_message(
 
 /// A Matrix bot allowing messages to be sent via DAPNET
 #[derive(Debug, Parser)]
+#[clap(author, version, about, long_about = None)]
 struct Cli {
     /// Matrix username
     #[clap(long, env = "MATRIX_USERNAME")]

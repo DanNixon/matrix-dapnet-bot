@@ -19,6 +19,7 @@ pub(crate) trait BotCommand {
 /// Hello, I'm a helpful bot that lets you interact with DAPNET from the comfort of Matrix.
 /// For more information about me, please see https://github.com/DanNixon/matrix-dapnet-bot.
 #[derive(Debug, Parser)]
+#[clap(author, version, about, long_about = None)]
 pub(crate) struct Bot {
     #[clap(subcommand)]
     command: Subcommand,
