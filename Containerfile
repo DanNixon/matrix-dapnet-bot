@@ -16,7 +16,8 @@ FROM docker.io/library/alpine:3.15
 
 RUN apk add \
   libgcc \
-  libstdc++
+  libstdc++ \
+  tini
 
 COPY --from=builder \
   /usr/local/bin/matrix-dapnet-bot \
@@ -24,5 +25,4 @@ COPY --from=builder \
 
 RUN mkdir /config
 
-ENTRYPOINT ["/usr/local/bin/matrix-dapnet-bot"]
-CMD ["--config-file", "/config/config.toml"]
+ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/matrix-dapnet-bot", "--config-file", "/config/config.toml"]
