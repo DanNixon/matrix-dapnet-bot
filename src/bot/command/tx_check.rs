@@ -10,6 +10,7 @@ use matrix_sdk::ruma::{events::room::message::TextMessageEventContent, UserId};
 pub(crate) struct TxCheck {
     /// Transmitting callsign (if not provided, the first callsign configured for your Matrix ID
     /// will be used)
+    #[clap(value_parser)]
     callsign: Option<Callsign>,
 }
 

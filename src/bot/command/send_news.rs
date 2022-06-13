@@ -11,16 +11,18 @@ use std::collections::HashSet;
 pub(crate) struct SendNews {
     /// Transmitting callsign (if not provided, the first callsign configured for your Matrix ID
     /// will be used)
-    #[clap(long, short)]
+    #[clap(value_parser, long, short)]
     from: Option<Callsign>,
 
     /// News item number (1-10) (mainly for Skyper pagers)
-    #[clap(long, short, default_value = "1")]
+    #[clap(value_parser, long, short, default_value = "1")]
     number: i8,
 
     /// Name of the rubric to publish news to
+    #[clap(value_parser)]
     rubric: String,
 
+    #[clap(value_parser)]
     message: Vec<String>,
 }
 

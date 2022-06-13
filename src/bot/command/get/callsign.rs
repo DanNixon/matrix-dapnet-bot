@@ -8,6 +8,7 @@ use matrix_sdk::ruma::{events::room::message::TextMessageEventContent, UserId};
 #[derive(Debug, Parser)]
 pub(super) struct Callsign {
     /// The callsign to lookup
+    #[clap(value_parser)]
     callsign: String,
 }
 

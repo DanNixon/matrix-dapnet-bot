@@ -10,21 +10,22 @@ use matrix_sdk::ruma::{events::room::message::TextMessageEventContent, UserId};
 pub(crate) struct Send {
     /// Transmitting callsign (if not provided, the first callsign configured for your Matrix ID
     /// will be used)
-    #[clap(long, short)]
+    #[clap(value_parser, long, short)]
     from: Option<Callsign>,
 
     /// Destination callsign(s)
-    #[clap(long, short)]
+    #[clap(value_parser, long, short)]
     recipient: Vec<Callsign>,
 
     /// Names of transmitter groups to send via
-    #[clap(long, short, default_value = "all")]
+    #[clap(value_parser, long, short, default_value = "all")]
     via: Vec<String>,
 
     /// Should message be sent with high priority
-    #[clap(long)]
+    #[clap(value_parser, long)]
     emergency: bool,
 
+    #[clap(value_parser)]
     message: Vec<String>,
 }
 

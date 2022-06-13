@@ -9,6 +9,7 @@ use matrix_sdk::ruma::{events::room::message::TextMessageEventContent, UserId};
 #[derive(Debug, Parser)]
 pub(super) struct Rubric {
     /// Name of the rubric to lookup
+    #[clap(value_parser)]
     name: String,
 }
 

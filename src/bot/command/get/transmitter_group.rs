@@ -8,6 +8,7 @@ use matrix_sdk::ruma::{events::room::message::TextMessageEventContent, UserId};
 #[derive(Debug, Parser)]
 pub(super) struct TransmitterGroup {
     /// Name of the transmitter group to lookup
+    #[clap(value_parser)]
     name: String,
 }
 
