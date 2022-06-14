@@ -3,7 +3,7 @@ use crate::Config;
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
 use clap::Parser;
-use matrix_sdk::ruma::{events::room::message::TextMessageEventContent, UserId};
+use matrix_sdk::ruma::{events::room::message::RoomMessageEventContent, OwnedUserId};
 
 #[derive(Debug, Parser)]
 pub(super) struct Node {}
@@ -12,12 +12,12 @@ pub(super) struct Node {}
 impl BotCommand for Node {
     async fn run_command(
         &self,
-        _: UserId,
+        _: OwnedUserId,
         dapnet: dapnet_api::Client,
         _: Config,
-    ) -> Result<TextMessageEventContent> {
+    ) -> Result<RoomMessageEventContent> {
         match dapnet.get_all_nodes().await? {
-            Some(nodes) => Ok(TextMessageEventContent::markdown(format!(
+            Some(nodes) => Ok(RoomMessageEventContent::text_markdown(format!(
                 "**Nodes**: {}",
                 nodes
                     .into_iter()

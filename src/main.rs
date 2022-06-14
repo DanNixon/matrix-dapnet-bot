@@ -7,15 +7,15 @@ use clap::Parser;
 use config::{Callsign, Config};
 use matrix_sdk::{
     self,
+    config::SyncSettings,
     room::Room,
     ruma::{
-        events::{
-            room::message::{MessageEventContent, MessageType, TextMessageEventContent},
-            AnyMessageEventContent, SyncMessageEvent,
+        events::room::message::{
+            MessageType, OriginalSyncRoomMessageEvent, RoomMessageEventContent,
+            TextMessageEventContent,
         },
-        UserId,
+        OwnedUserId, UserId,
     },
-    SyncSettings,
 };
 
 /// A Matrix bot allowing messages to be sent via DAPNET
@@ -60,8 +60,11 @@ async fn main() -> Result<()> {
     log::debug!("Loaded configuration: {:?}", config);
 
     log::info!("Logging into Matrix...");
-    let matrix_user = UserId::try_from(args.matrix_username.clone())?;
-    let matrix_client = matrix_sdk::Client::new_from_user_id(matrix_user.clone()).await?;
+    let matrix_user = UserId::parse(args.matrix_username.clone())?;
+    let matrix_client = matrix_sdk::Client::builder()
+        .homeserver_url(format!("https://{}", matrix_user.server_name()))
+        .build()
+        .await?;
     matrix_client
         .login(
             matrix_user.localpart(),
@@ -79,13 +82,11 @@ async fn main() -> Result<()> {
             let dapnet_client = dapnet_client.clone();
             let config = config.clone();
             let matrix_user = matrix_user.clone();
-            move |event: SyncMessageEvent<MessageEventContent>, room: Room| {
+            move |event: OriginalSyncRoomMessageEvent, room: Room| {
                 let dapnet_client = dapnet_client.clone();
                 let config = config.clone();
                 let matrix_user = matrix_user.clone();
-                async move {
-                    handle_message(event, room, matrix_user, dapnet_client, config).await;
-                }
+                async move { handle_message(event, room, matrix_user, dapnet_client, config).await }
             }
         })
         .await;
@@ -99,43 +100,39 @@ async fn main() -> Result<()> {
 }
 
 async fn handle_message(
-    event: SyncMessageEvent<MessageEventContent>,
+    event: OriginalSyncRoomMessageEvent,
     room: Room,
-    me: UserId,
+    me: OwnedUserId,
     dapnet: dapnet_api::Client,
     config: Config,
 ) {
     if let Room::Joined(room) = room {
-        if let Some(msg_body) = get_message_body(&event) {
-            if event.sender != me && msg_body.starts_with("!dapnet") {
+        if let MessageType::Text(TextMessageEventContent { body, .. }) = event.content.msgtype {
+            if event.sender != me && body.starts_with("!dapnet") {
                 if let Err(e) = room
                     .send(
-                        AnyMessageEventContent::RoomMessage(MessageEventContent::new(
-                            MessageType::Text(match Bot::try_parse_from(msg_body.split(' ')) {
-                                Ok(args) => {
-                                    match args.run_command(event.sender, dapnet, config).await {
-                                        Ok(reply) => reply,
-                                        Err(e) => TextMessageEventContent::markdown(format!(
-                                            "**Sad bot is sad :c**\n```\n{}\n```",
-                                            e
-                                        )),
-                                    }
+                        match Bot::try_parse_from(body.split(' ')) {
+                            Ok(args) => {
+                                match args.run_command(event.sender, dapnet, config).await {
+                                    Ok(reply) => reply,
+                                    Err(e) => RoomMessageEventContent::text_markdown(format!(
+                                        "**Sad bot is sad :c**\n```\n{}\n```",
+                                        e
+                                    )),
                                 }
-                                Err(e) => {
-                                    TextMessageEventContent::markdown(format!("```\n{}\n```", e))
-                                }
-                            }),
-                        )),
+                            }
+                            Err(e) => {
+                                RoomMessageEventContent::text_markdown(format!("```\n{}\n```", e))
+                            }
+                        },
                         None,
                     )
                     .await
                 {
                     room.send(
-                        AnyMessageEventContent::RoomMessage(MessageEventContent::new(
-                            MessageType::Text(TextMessageEventContent::markdown(format!(
-                                "**Sad bot is sad :c**\n```\n{}\n```",
-                                e
-                            ))),
+                        RoomMessageEventContent::text_markdown(format!(
+                            "**Sad bot is sad :c**\n```\n{}\n```",
+                            e
                         )),
                         None,
                     )
@@ -144,21 +141,5 @@ async fn handle_message(
                 }
             }
         }
-    }
-}
-
-fn get_message_body(event: &SyncMessageEvent<MessageEventContent>) -> Option<&String> {
-    if let SyncMessageEvent {
-        content:
-            MessageEventContent {
-                msgtype: MessageType::Text(TextMessageEventContent { body, .. }),
-                ..
-            },
-        ..
-    } = event
-    {
-        Some(body)
-    } else {
-        None
     }
 }

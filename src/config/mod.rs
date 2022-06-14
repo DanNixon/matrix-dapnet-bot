@@ -20,7 +20,9 @@ impl Config {
     }
 
     pub fn get_user(&self, matrix_id: &UserId) -> Option<&User> {
-        self.users.iter().find(|u| u.matrix_ids.contains(matrix_id))
+        self.users
+            .iter()
+            .find(|u| u.matrix_ids.iter().any(|i| i == matrix_id))
     }
 
     pub fn check_user_can_transmit(

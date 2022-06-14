@@ -4,7 +4,7 @@ use anyhow::{anyhow, Result};
 use async_trait::async_trait;
 use clap::Parser;
 use dapnet_api::Call;
-use matrix_sdk::ruma::{events::room::message::TextMessageEventContent, UserId};
+use matrix_sdk::ruma::{events::room::message::RoomMessageEventContent, OwnedUserId};
 
 #[derive(Debug, Parser)]
 pub(crate) struct Send {
@@ -33,10 +33,10 @@ pub(crate) struct Send {
 impl BotCommand for Send {
     async fn run_command(
         &self,
-        sender: UserId,
+        sender: OwnedUserId,
         dapnet: dapnet_api::Client,
         config: Config,
-    ) -> Result<TextMessageEventContent> {
+    ) -> Result<RoomMessageEventContent> {
         let message = &self.message.join(" ");
         let transmit_callsign = utils::get_transmit_callsign(&sender, &config, &self.from)?;
 
@@ -62,7 +62,7 @@ impl BotCommand for Send {
             ))
             .await
         {
-            Ok(()) => Ok(TextMessageEventContent::markdown(format!(
+            Ok(()) => Ok(RoomMessageEventContent::text_markdown(format!(
                 "{}, your message has been sent!",
                 sender
             ))),

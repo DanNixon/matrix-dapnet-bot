@@ -3,7 +3,7 @@ use crate::Config;
 use anyhow::Result;
 use async_trait::async_trait;
 use clap::Parser;
-use matrix_sdk::ruma::{events::room::message::TextMessageEventContent, UserId};
+use matrix_sdk::ruma::{events::room::message::RoomMessageEventContent, OwnedUserId};
 
 #[derive(Debug, Parser)]
 pub(super) struct Transmitter {
@@ -16,12 +16,12 @@ pub(super) struct Transmitter {
 impl BotCommand for Transmitter {
     async fn run_command(
         &self,
-        _: UserId,
+        _: OwnedUserId,
         dapnet: dapnet_api::Client,
         _: Config,
-    ) -> Result<TextMessageEventContent> {
+    ) -> Result<RoomMessageEventContent> {
         match dapnet.get_transmitter(&self.name).await? {
-            Some(transmitter) => Ok(TextMessageEventContent::markdown(format!(
+            Some(transmitter) => Ok(RoomMessageEventContent::text_markdown(format!(
                 "**Transmitter** {}<br>\
                 Owner(s): {}<br>\
                 Usage: {:?}<br>\
@@ -65,7 +65,7 @@ impl BotCommand for Transmitter {
                 transmitter.latitude,
                 transmitter.longitude,
             ))),
-            None => Ok(TextMessageEventContent::plain(format!(
+            None => Ok(RoomMessageEventContent::text_plain(format!(
                 "Transmitter \"{}\" not found.",
                 &self.name,
             ))),

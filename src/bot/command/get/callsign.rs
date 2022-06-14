@@ -3,7 +3,7 @@ use crate::Config;
 use anyhow::Result;
 use async_trait::async_trait;
 use clap::Parser;
-use matrix_sdk::ruma::{events::room::message::TextMessageEventContent, UserId};
+use matrix_sdk::ruma::{events::room::message::RoomMessageEventContent, OwnedUserId};
 
 #[derive(Debug, Parser)]
 pub(super) struct Callsign {
@@ -16,17 +16,17 @@ pub(super) struct Callsign {
 impl BotCommand for Callsign {
     async fn run_command(
         &self,
-        _: UserId,
+        _: OwnedUserId,
         dapnet: dapnet_api::Client,
         _: Config,
-    ) -> Result<TextMessageEventContent> {
+    ) -> Result<RoomMessageEventContent> {
         match dapnet.get_callsign(&self.callsign).await? {
-            Some(callsign) => Ok(TextMessageEventContent::markdown(format!(
+            Some(callsign) => Ok(RoomMessageEventContent::text_markdown(format!(
                 "**Callsign** {}<br>\
                 {}",
                 callsign.name, callsign.description,
             ))),
-            None => Ok(TextMessageEventContent::plain(format!(
+            None => Ok(RoomMessageEventContent::text_plain(format!(
                 "Callsign \"{}\" not found.",
                 &self.callsign,
             ))),

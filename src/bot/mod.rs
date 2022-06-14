@@ -4,16 +4,16 @@ use crate::Config;
 use anyhow::Result;
 use async_trait::async_trait;
 use clap::Parser;
-use matrix_sdk::ruma::{events::room::message::TextMessageEventContent, UserId};
+use matrix_sdk::ruma::{events::room::message::RoomMessageEventContent, OwnedUserId};
 
 #[async_trait]
 pub(crate) trait BotCommand {
     async fn run_command(
         &self,
-        sender: UserId,
+        sender: OwnedUserId,
         dapnet: dapnet_api::Client,
         config: Config,
-    ) -> Result<TextMessageEventContent>;
+    ) -> Result<RoomMessageEventContent>;
 }
 
 /// Hello, I'm a helpful bot that lets you interact with DAPNET from the comfort of Matrix.
@@ -29,10 +29,10 @@ pub(crate) struct Bot {
 impl BotCommand for Bot {
     async fn run_command(
         &self,
-        sender: UserId,
+        sender: OwnedUserId,
         dapnet: dapnet_api::Client,
         config: Config,
-    ) -> Result<TextMessageEventContent> {
+    ) -> Result<RoomMessageEventContent> {
         self.command.run_command(sender, dapnet, config).await
     }
 }
@@ -65,10 +65,10 @@ enum Subcommand {
 impl BotCommand for Subcommand {
     async fn run_command(
         &self,
-        sender: UserId,
+        sender: OwnedUserId,
         dapnet: dapnet_api::Client,
         config: Config,
-    ) -> Result<TextMessageEventContent> {
+    ) -> Result<RoomMessageEventContent> {
         match self {
             Subcommand::BotOperators(c) => c.run_command(sender, dapnet, config).await,
             Subcommand::TxCheck(c) => c.run_command(sender, dapnet, config).await,

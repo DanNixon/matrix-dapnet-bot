@@ -4,7 +4,7 @@ use anyhow::Result;
 use async_trait::async_trait;
 use clap::Parser;
 use itertools::Itertools;
-use matrix_sdk::ruma::{events::room::message::TextMessageEventContent, UserId};
+use matrix_sdk::ruma::{events::room::message::RoomMessageEventContent, OwnedUserId};
 
 #[derive(Debug, Parser)]
 pub(crate) struct BotOperators {}
@@ -13,11 +13,11 @@ pub(crate) struct BotOperators {}
 impl BotCommand for BotOperators {
     async fn run_command(
         &self,
-        _: UserId,
+        _: OwnedUserId,
         _: dapnet_api::Client,
         config: Config,
-    ) -> Result<TextMessageEventContent> {
-        Ok(TextMessageEventContent::markdown(format!(
+    ) -> Result<RoomMessageEventContent> {
+        Ok(RoomMessageEventContent::text_markdown(format!(
             "This bot is managed by:\n{}",
             config
                 .operators

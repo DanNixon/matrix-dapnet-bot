@@ -9,7 +9,7 @@ use crate::Config;
 use anyhow::Result;
 use async_trait::async_trait;
 use clap::Parser;
-use matrix_sdk::ruma::{events::room::message::TextMessageEventContent, UserId};
+use matrix_sdk::ruma::{events::room::message::RoomMessageEventContent, OwnedUserId};
 
 #[derive(Debug, Parser)]
 pub(crate) struct Get {
@@ -21,10 +21,10 @@ pub(crate) struct Get {
 impl BotCommand for Get {
     async fn run_command(
         &self,
-        sender: UserId,
+        sender: OwnedUserId,
         dapnet: dapnet_api::Client,
         config: Config,
-    ) -> Result<TextMessageEventContent> {
+    ) -> Result<RoomMessageEventContent> {
         self.command.run_command(sender, dapnet, config).await
     }
 }
@@ -42,10 +42,10 @@ enum Subcommand {
 impl BotCommand for Subcommand {
     async fn run_command(
         &self,
-        sender: UserId,
+        sender: OwnedUserId,
         dapnet: dapnet_api::Client,
         config: Config,
-    ) -> Result<TextMessageEventContent> {
+    ) -> Result<RoomMessageEventContent> {
         match self {
             Subcommand::Callsign(c) => c.run_command(sender, dapnet, config).await,
             Subcommand::Node(c) => c.run_command(sender, dapnet, config).await,

@@ -4,7 +4,7 @@ use anyhow::{anyhow, Result};
 use async_trait::async_trait;
 use clap::Parser;
 use dapnet_api::{News, Rubric};
-use matrix_sdk::ruma::{events::room::message::TextMessageEventContent, UserId};
+use matrix_sdk::ruma::{events::room::message::RoomMessageEventContent, OwnedUserId};
 use std::collections::HashSet;
 
 #[derive(Debug, Parser)]
@@ -26,7 +26,11 @@ pub(crate) struct SendNews {
     message: Vec<String>,
 }
 
-fn check_user_can_send_to_rubric(sender: &UserId, config: &Config, rubric: &Rubric) -> Result<()> {
+fn check_user_can_send_to_rubric(
+    sender: &OwnedUserId,
+    config: &Config,
+    rubric: &Rubric,
+) -> Result<()> {
     let user = config.get_user(sender).unwrap();
 
     let user_usernames = user.dapnet_usernames.iter().collect::<HashSet<_>>();
@@ -47,10 +51,10 @@ fn check_user_can_send_to_rubric(sender: &UserId, config: &Config, rubric: &Rubr
 impl BotCommand for SendNews {
     async fn run_command(
         &self,
-        sender: UserId,
+        sender: OwnedUserId,
         dapnet: dapnet_api::Client,
         config: Config,
-    ) -> Result<TextMessageEventContent> {
+    ) -> Result<RoomMessageEventContent> {
         let message = &self.message.join(" ");
         let transmit_callsign = utils::get_transmit_callsign(&sender, &config, &self.from)?;
 
@@ -81,7 +85,7 @@ impl BotCommand for SendNews {
         news.number = Some(self.number);
 
         match dapnet.new_news(&news).await {
-            Ok(()) => Ok(TextMessageEventContent::markdown(format!(
+            Ok(()) => Ok(RoomMessageEventContent::text_markdown(format!(
                 "{}, your news item has been sent to rubric {} ({})!",
                 sender, rubric.name, rubric.number,
             ))),

@@ -4,7 +4,7 @@ use anyhow::Result;
 use async_trait::async_trait;
 use clap::Parser;
 use itertools::Itertools;
-use matrix_sdk::ruma::{events::room::message::TextMessageEventContent, UserId};
+use matrix_sdk::ruma::{events::room::message::RoomMessageEventContent, OwnedUserId};
 
 #[derive(Debug, Parser)]
 pub(crate) struct TxCheck {
@@ -18,11 +18,11 @@ pub(crate) struct TxCheck {
 impl BotCommand for TxCheck {
     async fn run_command(
         &self,
-        sender: UserId,
+        sender: OwnedUserId,
         _: dapnet_api::Client,
         config: Config,
-    ) -> Result<TextMessageEventContent> {
-        Ok(TextMessageEventContent::markdown(match &self.callsign {
+    ) -> Result<RoomMessageEventContent> {
+        Ok(RoomMessageEventContent::text_markdown(match &self.callsign {
             Some(callsign) => match config.check_user_can_transmit(&sender, callsign) {
                 Some(user) => format!(
                     "Congrats {}, you are configured to transmit using the following callsigns: {}",
