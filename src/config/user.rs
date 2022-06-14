@@ -1,11 +1,11 @@
 use super::Callsign;
 use anyhow::{anyhow, Result};
-use matrix_sdk::ruma::UserId;
+use matrix_sdk::ruma::{OwnedUserId, UserId};
 use serde::Deserialize;
 
 #[derive(Clone, Debug, Deserialize)]
 pub(crate) struct User {
-    pub matrix_ids: Vec<UserId>,
+    pub matrix_ids: Vec<OwnedUserId>,
     pub callsigns: Vec<Callsign>,
     #[serde(default)]
     pub dapnet_usernames: Vec<String>,
@@ -15,7 +15,7 @@ impl User {
     pub(crate) fn check_can_transmit(&self, matrix_id: &UserId, callsign: &Callsign) -> Result<()> {
         if !self.callsigns.contains(callsign) {
             Err(anyhow!("Callsign \"{}\" unknown to this user", callsign))
-        } else if !self.matrix_ids.contains(matrix_id) {
+        } else if !self.matrix_ids.iter().any(|i| i == matrix_id) {
             Err(anyhow!(
                 "Matrix user ID \"{}\" unknown to this user",
                 matrix_id

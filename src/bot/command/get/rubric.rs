@@ -4,7 +4,7 @@ use anyhow::Result;
 use async_trait::async_trait;
 use clap::Parser;
 use itertools::Itertools;
-use matrix_sdk::ruma::{events::room::message::TextMessageEventContent, UserId};
+use matrix_sdk::ruma::{events::room::message::RoomMessageEventContent, OwnedUserId};
 
 #[derive(Debug, Parser)]
 pub(super) struct Rubric {
@@ -17,10 +17,10 @@ pub(super) struct Rubric {
 impl BotCommand for Rubric {
     async fn run_command(
         &self,
-        _: UserId,
+        _: OwnedUserId,
         dapnet: dapnet_api::Client,
         _: Config,
-    ) -> Result<TextMessageEventContent> {
+    ) -> Result<RoomMessageEventContent> {
         match dapnet.get_rubric(&self.name).await? {
             Some(rubric) => {
                 let news = match dapnet.get_news(&rubric.name).await {
@@ -57,7 +57,7 @@ impl BotCommand for Rubric {
                     }
                 };
 
-                Ok(TextMessageEventContent::markdown(format!(
+                Ok(RoomMessageEventContent::text_markdown(format!(
                     "**Rubric** {}<br>\
                     RIC: {}<br>\
                     Label: {}<br>\
@@ -73,7 +73,7 @@ impl BotCommand for Rubric {
                     news,
                 )))
             }
-            None => Ok(TextMessageEventContent::plain(format!(
+            None => Ok(RoomMessageEventContent::text_plain(format!(
                 "Rubric \"{}\" not found.",
                 &self.name,
             ))),
