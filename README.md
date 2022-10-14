@@ -1,4 +1,7 @@
-# matrix-dapnet-bot [![CI](https://github.com/DanNixon/matrix-dapnet-bot/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/DanNixon/matrix-dapnet-bot/actions/workflows/ci.yml)
+# matrix-dapnet-bot
+
+[![CI](https://github.com/DanNixon/matrix-dapnet-bot/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/DanNixon/matrix-dapnet-bot/actions/workflows/ci.yml)
+[![dependency status](https://deps.rs/repo/github/dannixon/matrix-dapnet-bot/status.svg)](https://deps.rs/repo/github/dannixon/matrix-dapnet-bot)
 
 Matrix bot that allows you to send pages over [DAPNET](https://www.hampager.de/).
 
