@@ -10,8 +10,13 @@ clap = { version = "4.0", features = ["derive", "env"] }
 dapnet-api = "0.2.0"
 env_logger = "0.9"
 itertools = "0.10"
+kagiyama = "0.1.0"
+lazy_static = "1.4.0"
 log = "0.4"
 matrix-sdk = { version = "0.5.0", default-features = false, features = ["e2e-encryption", "markdown", "native-tls"] }
+prometheus-client = "0.18.0"
 serde = "1.0"
+strum = "0.24.1"
+strum_macros = "0.24.3"
 tokio = { version = "1.21", features = ["macros", "rt-multi-thread"] }
 toml = "0.5"

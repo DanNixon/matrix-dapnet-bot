@@ -1,10 +1,12 @@
 mod bot;
 mod config;
+mod metrics;
 
 use anyhow::Result;
 use bot::{Bot, BotCommand};
 use clap::Parser;
 use config::{Callsign, Config};
+use kagiyama::Watcher;
 use matrix_sdk::{
     self,
     config::SyncSettings,
@@ -17,6 +19,7 @@ use matrix_sdk::{
         OwnedUserId, UserId,
     },
 };
+use std::net::SocketAddr;
 
 /// A Matrix bot allowing messages to be sent via DAPNET
 #[derive(Debug, Parser)]
@@ -46,18 +49,29 @@ struct Cli {
         default_value = "./config.toml"
     )]
     config_file: String,
+
+    /// Address to listen on for observability/metrics endpoints
+    #[clap(
+        value_parser,
+        long,
+        env = "OBSERVABILITY_ADDRESS",
+        default_value = "127.0.0.1:9090"
+    )]
+    observability_address: SocketAddr,
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
+    env_logger::init();
 
     let args = Cli::parse();
+    let config = Config::from_file(&args.config_file)?;
+
+    let mut watcher = Watcher::<metrics::ReadinessConditions>::default();
+    metrics::register(&watcher);
+    watcher.start_server(args.observability_address).await?;
 
     let dapnet_client = dapnet_api::Client::new(&args.dapnet_username, &args.dapnet_password);
-
-    let config = Config::from_file(&args.config_file)?;
-    log::debug!("Loaded configuration: {:?}", config);
 
     log::info!("Logging into Matrix...");
     let matrix_user = UserId::parse(args.matrix_username.clone())?;
@@ -92,6 +106,10 @@ async fn main() -> Result<()> {
         .await;
 
     log::info!("Logged into Matrix");
+    watcher
+        .readiness_probe()
+        .mark_ready(metrics::ReadinessConditions::LoggedIntoMatrix);
+
     matrix_client
         .sync(SyncSettings::default().token(matrix_client.sync_token().await.unwrap()))
         .await;
@@ -115,13 +133,17 @@ async fn handle_message(
                             Ok(args) => {
                                 match args.run_command(event.sender, dapnet, config).await {
                                     Ok(reply) => reply,
-                                    Err(e) => RoomMessageEventContent::text_markdown(format!(
-                                        "**Sad bot is sad :c**\n```\n{}\n```",
-                                        e
-                                    )),
+                                    Err(e) => {
+                                        metrics::FAILURES.inc();
+                                        RoomMessageEventContent::text_markdown(format!(
+                                            "**Sad bot is sad :c**\n```\n{}\n```",
+                                            e
+                                        ))
+                                    }
                                 }
                             }
                             Err(e) => {
+                                metrics::FAILURES.inc();
                                 RoomMessageEventContent::text_markdown(format!("```\n{}\n```", e))
                             }
                         },
@@ -129,6 +151,7 @@ async fn handle_message(
                     )
                     .await
                 {
+                    metrics::FAILURES.inc();
                     room.send(
                         RoomMessageEventContent::text_markdown(format!(
                             "**Sad bot is sad :c**\n```\n{}\n```",
