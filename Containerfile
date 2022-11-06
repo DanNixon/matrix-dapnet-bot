@@ -25,4 +25,7 @@ COPY --from=builder \
 
 RUN mkdir /config
 
+ENV OBSERVABILITY_ADDRESS "0.0.0.0:9090"
+EXPOSE 9090
+
 ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/matrix-dapnet-bot", "--config-file", "/config/config.toml"]
