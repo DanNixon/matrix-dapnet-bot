@@ -80,30 +80,25 @@ async fn main() -> Result<()> {
         .build()
         .await?;
     matrix_client
-        .login(
-            matrix_user.localpart(),
-            &args.matrix_password,
-            None,
-            Some("matrix-dapnet-bot"),
-        )
+        .login_username(matrix_user.localpart(), &args.matrix_password)
+        .initial_device_display_name("matrix-dapnet-bot")
+        .send()
         .await?;
 
     log::info!("Performing initial sync...");
     matrix_client.sync_once(SyncSettings::default()).await?;
 
-    matrix_client
-        .register_event_handler({
+    matrix_client.add_event_handler({
+        let dapnet_client = dapnet_client.clone();
+        let config = config.clone();
+        let matrix_user = matrix_user.clone();
+        move |event: OriginalSyncRoomMessageEvent, room: Room| {
             let dapnet_client = dapnet_client.clone();
             let config = config.clone();
             let matrix_user = matrix_user.clone();
-            move |event: OriginalSyncRoomMessageEvent, room: Room| {
-                let dapnet_client = dapnet_client.clone();
-                let config = config.clone();
-                let matrix_user = matrix_user.clone();
-                async move { handle_message(event, room, matrix_user, dapnet_client, config).await }
-            }
-        })
-        .await;
+            async move { handle_message(event, room, matrix_user, dapnet_client, config).await }
+        }
+    });
 
     log::info!("Logged into Matrix");
     watcher
@@ -112,7 +107,7 @@ async fn main() -> Result<()> {
 
     matrix_client
         .sync(SyncSettings::default().token(matrix_client.sync_token().await.unwrap()))
-        .await;
+        .await?;
 
     Ok(())
 }
