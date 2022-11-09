@@ -1,5 +1,4 @@
 use super::BotCommand;
-use crate::Config;
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
 use clap::Parser;
@@ -14,7 +13,6 @@ impl BotCommand for Stats {
         &self,
         _: OwnedUserId,
         dapnet: dapnet_api::Client,
-        _: Config,
     ) -> Result<RoomMessageEventContent> {
         match dapnet.get_statistics().await? {
             Some(stats) => Ok(RoomMessageEventContent::text_markdown(format!(

@@ -21,9 +21,8 @@ impl BotCommand for List {
         &self,
         sender: OwnedUserId,
         dapnet: dapnet_api::Client,
-        config: Config,
     ) -> Result<RoomMessageEventContent> {
-        self.command.run_command(sender, dapnet, config).await
+        self.command.run_command(sender, dapnet).await
     }
 }
 
@@ -40,12 +39,11 @@ impl BotCommand for Subcommand {
         &self,
         sender: OwnedUserId,
         dapnet: dapnet_api::Client,
-        config: Config,
     ) -> Result<RoomMessageEventContent> {
         match self {
-            Subcommand::Node(c) => c.run_command(sender, dapnet, config).await,
-            Subcommand::Rubric(c) => c.run_command(sender, dapnet, config).await,
-            Subcommand::TransmitterGroup(c) => c.run_command(sender, dapnet, config).await,
+            Subcommand::Node(c) => c.run_command(sender, dapnet).await,
+            Subcommand::Rubric(c) => c.run_command(sender, dapnet).await,
+            Subcommand::TransmitterGroup(c) => c.run_command(sender, dapnet).await,
         }
     }
 }

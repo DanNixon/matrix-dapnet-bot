@@ -1,10 +1,8 @@
-use crate::{Callsign, Config};
 use anyhow::{anyhow, Result};
 use matrix_sdk::ruma::UserId;
 
 pub(crate) fn get_transmit_callsign<'a>(
     sender: &'a UserId,
-    config: &'a Config,
     requested_callsign: &'a Option<Callsign>,
 ) -> Result<&'a Callsign> {
     match requested_callsign {

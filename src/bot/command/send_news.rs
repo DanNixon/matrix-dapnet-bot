@@ -1,5 +1,4 @@
 use super::{utils, BotCommand};
-use crate::{Callsign, Config};
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
 use clap::Parser;
@@ -28,7 +27,6 @@ pub(crate) struct SendNews {
 
 fn check_user_can_send_to_rubric(
     sender: &OwnedUserId,
-    config: &Config,
     rubric: &Rubric,
 ) -> Result<()> {
     let user = config.get_user(sender).unwrap();
@@ -53,7 +51,6 @@ impl BotCommand for SendNews {
         &self,
         sender: OwnedUserId,
         dapnet: dapnet_api::Client,
-        config: Config,
     ) -> Result<RoomMessageEventContent> {
         let message = &self.message.join(" ");
         let transmit_callsign = utils::get_transmit_callsign(&sender, &config, &self.from)?;

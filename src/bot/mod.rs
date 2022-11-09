@@ -1,9 +1,6 @@
 mod command;
 
-use crate::{
-    metrics::{CommandKind, CommandLables, COMMANDS},
-    Config,
-};
+use crate::metrics::{CommandKind, CommandLables, COMMANDS};
 use anyhow::Result;
 use async_trait::async_trait;
 use clap::Parser;
@@ -15,7 +12,6 @@ pub(crate) trait BotCommand {
         &self,
         sender: OwnedUserId,
         dapnet: dapnet_api::Client,
-        config: Config,
     ) -> Result<RoomMessageEventContent>;
 }
 
@@ -34,9 +30,8 @@ impl BotCommand for Bot {
         &self,
         sender: OwnedUserId,
         dapnet: dapnet_api::Client,
-        config: Config,
     ) -> Result<RoomMessageEventContent> {
-        self.command.run_command(sender, dapnet, config).await
+        self.command.run_command(sender, dapnet).await
     }
 }
 
@@ -70,14 +65,11 @@ impl BotCommand for Subcommand {
         &self,
         sender: OwnedUserId,
         dapnet: dapnet_api::Client,
-        config: Config,
     ) -> Result<RoomMessageEventContent> {
         COMMANDS
             .get_or_create(&CommandLables::new(
                 &sender,
                 match self {
-                    Subcommand::BotOperators(_) => CommandKind::BotOperators,
-                    Subcommand::TxCheck(_) => CommandKind::TxCheck,
                     Subcommand::List(_) => CommandKind::List,
                     Subcommand::Get(_) => CommandKind::Get,
                     Subcommand::Stats(_) => CommandKind::Stats,
@@ -88,13 +80,11 @@ impl BotCommand for Subcommand {
             .inc();
 
         match self {
-            Subcommand::BotOperators(c) => c.run_command(sender, dapnet, config).await,
-            Subcommand::TxCheck(c) => c.run_command(sender, dapnet, config).await,
-            Subcommand::List(c) => c.run_command(sender, dapnet, config).await,
-            Subcommand::Get(c) => c.run_command(sender, dapnet, config).await,
-            Subcommand::Stats(c) => c.run_command(sender, dapnet, config).await,
-            Subcommand::Send(c) => c.run_command(sender, dapnet, config).await,
-            Subcommand::SendNews(c) => c.run_command(sender, dapnet, config).await,
+            Subcommand::List(c) => c.run_command(sender, dapnet).await,
+            Subcommand::Get(c) => c.run_command(sender, dapnet).await,
+            Subcommand::Stats(c) => c.run_command(sender, dapnet).await,
+            Subcommand::Send(c) => c.run_command(sender, dapnet).await,
+            Subcommand::SendNews(c) => c.run_command(sender, dapnet).await,
         }
     }
 }

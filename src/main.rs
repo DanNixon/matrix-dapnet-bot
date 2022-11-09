@@ -1,11 +1,9 @@
 mod bot;
-mod config;
 mod metrics;
 
 use anyhow::Result;
 use bot::{Bot, BotCommand};
 use clap::Parser;
-use config::{Callsign, Config};
 use kagiyama::Watcher;
 use matrix_sdk::{
     self,
@@ -33,22 +31,13 @@ struct Cli {
     #[clap(value_parser, long, env = "MATRIX_PASSWORD")]
     matrix_password: String,
 
-    /// DAPNET username
+    /// DAPNET username for read only operations
     #[clap(value_parser, long, env = "DAPNET_USERNAME")]
     dapnet_username: String,
 
-    /// DAPNET password
+    /// DAPNET password for read only operations
     #[clap(value_parser, long, env = "DAPNET_PASSWORD")]
     dapnet_password: String,
-
-    /// Path to configuration file
-    #[clap(
-        value_parser,
-        long,
-        env = "CONFIG_FILE",
-        default_value = "./config.toml"
-    )]
-    config_file: String,
 
     /// Address to listen on for observability/metrics endpoints
     #[clap(
@@ -57,7 +46,7 @@ struct Cli {
         env = "OBSERVABILITY_ADDRESS",
         default_value = "127.0.0.1:9090"
     )]
-    observability_address: SocketAddr,
+        observability_address: SocketAddr,
 }
 
 #[tokio::main]
@@ -65,7 +54,6 @@ async fn main() -> Result<()> {
     env_logger::init();
 
     let args = Cli::parse();
-    let config = Config::from_file(&args.config_file)?;
 
     let mut watcher = Watcher::<metrics::ReadinessConditions>::default();
     metrics::register(&watcher);
@@ -94,16 +82,14 @@ async fn main() -> Result<()> {
     matrix_client
         .register_event_handler({
             let dapnet_client = dapnet_client.clone();
-            let config = config.clone();
             let matrix_user = matrix_user.clone();
             move |event: OriginalSyncRoomMessageEvent, room: Room| {
                 let dapnet_client = dapnet_client.clone();
-                let config = config.clone();
                 let matrix_user = matrix_user.clone();
-                async move { handle_message(event, room, matrix_user, dapnet_client, config).await }
+                async move { handle_message(event, room, matrix_user, dapnet_client ).await }
             }
         })
-        .await;
+    .await;
 
     log::info!("Logged into Matrix");
     watcher
@@ -122,7 +108,6 @@ async fn handle_message(
     room: Room,
     me: OwnedUserId,
     dapnet: dapnet_api::Client,
-    config: Config,
 ) {
     if let Room::Joined(room) = room {
         if let MessageType::Text(TextMessageEventContent { body, .. }) = event.content.msgtype {
@@ -131,13 +116,13 @@ async fn handle_message(
                     .send(
                         match Bot::try_parse_from(body.split(' ')) {
                             Ok(args) => {
-                                match args.run_command(event.sender, dapnet, config).await {
+                                match args.run_command(event.sender, dapnet).await {
                                     Ok(reply) => reply,
                                     Err(e) => {
                                         metrics::FAILURES.inc();
                                         RoomMessageEventContent::text_markdown(format!(
-                                            "**Sad bot is sad :c**\n```\n{}\n```",
-                                            e
+                                                "**Sad bot is sad :c**\n```\n{}\n```",
+                                                e
                                         ))
                                     }
                                 }
@@ -149,18 +134,18 @@ async fn handle_message(
                         },
                         None,
                     )
-                    .await
+                        .await
                 {
                     metrics::FAILURES.inc();
                     room.send(
                         RoomMessageEventContent::text_markdown(format!(
-                            "**Sad bot is sad :c**\n```\n{}\n```",
-                            e
+                                "**Sad bot is sad :c**\n```\n{}\n```",
+                                e
                         )),
                         None,
                     )
-                    .await
-                    .unwrap();
+                        .await
+                        .unwrap();
                 }
             }
         }

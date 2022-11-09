@@ -28,8 +28,6 @@ impl CommandLables {
 
 #[derive(Clone, Eq, Hash, PartialEq, Encode)]
 pub(crate) enum CommandKind {
-    BotOperators,
-    TxCheck,
     List,
     Get,
     Stats,
