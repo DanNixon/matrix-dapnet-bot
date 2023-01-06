@@ -18,5 +18,5 @@ prometheus-client = "0.18.0"
 serde = "1.0"
 strum = "0.24.1"
 strum_macros = "0.24.3"
-tokio = { version = "1.21", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.23", features = ["macros", "rt-multi-thread"] }
 toml = "0.5"
