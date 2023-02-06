@@ -80,14 +80,14 @@ impl BotCommand for SendNews {
 
         let mut news = News::new(
             rubric.name.clone(),
-            format!("{}: {}", transmit_callsign, message),
+            format!("{transmit_callsign}: {message}"),
         );
         news.number = Some(self.number);
 
         match dapnet.new_news(&news).await {
             Ok(()) => Ok(RoomMessageEventContent::text_markdown(format!(
-                "{}, your news item has been sent to rubric {} ({})!",
-                sender, rubric.name, rubric.number,
+                "{sender}, your news item has been sent to rubric {} ({})!",
+                rubric.name, rubric.number,
             ))),
             Err(e) => Err(e),
         }

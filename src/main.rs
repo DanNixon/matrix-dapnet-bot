@@ -136,15 +136,14 @@ async fn handle_message(
                                     Err(e) => {
                                         metrics::FAILURES.inc();
                                         RoomMessageEventContent::text_markdown(format!(
-                                            "**Sad bot is sad :c**\n```\n{}\n```",
-                                            e
+                                            "**Sad bot is sad :c**\n```\n{e}\n```",
                                         ))
                                     }
                                 }
                             }
                             Err(e) => {
                                 metrics::FAILURES.inc();
-                                RoomMessageEventContent::text_markdown(format!("```\n{}\n```", e))
+                                RoomMessageEventContent::text_markdown(format!("```\n{e}\n```"))
                             }
                         },
                         None,
@@ -154,8 +153,7 @@ async fn handle_message(
                     metrics::FAILURES.inc();
                     room.send(
                         RoomMessageEventContent::text_markdown(format!(
-                            "**Sad bot is sad :c**\n```\n{}\n```",
-                            e
+                            "**Sad bot is sad :c**\n```\n{e}\n```",
                         )),
                         None,
                     )

@@ -31,16 +31,16 @@ impl BotCommand for Rubric {
                                 format!(
                                     "-{} {}{}{}",
                                     match i.number {
-                                        Some(t) => format!(" ({})", t),
+                                        Some(t) => format!(" ({t})"),
                                         None => String::default(),
                                     },
                                     i.text,
                                     match i.timestamp {
-                                        Some(t) => format!(" @ {}", t),
+                                        Some(t) => format!(" @ {t}"),
                                         None => String::default(),
                                     },
                                     match &i.sender {
-                                        Some(t) => format!(" by {}", t),
+                                        Some(t) => format!(" by {t}"),
                                         None => String::default(),
                                     }
                                 )

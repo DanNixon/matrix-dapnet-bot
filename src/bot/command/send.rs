@@ -53,7 +53,7 @@ impl BotCommand for Send {
 
         match dapnet
             .new_call(&Call::new(
-                format!("{}: {}", transmit_callsign, message),
+                format!("{transmit_callsign}: {message}"),
                 self.recipient
                     .iter()
                     .map(|r| r.lower().to_string())
@@ -63,8 +63,7 @@ impl BotCommand for Send {
             .await
         {
             Ok(()) => Ok(RoomMessageEventContent::text_markdown(format!(
-                "{}, your message has been sent!",
-                sender
+                "{sender}, your message has been sent!",
             ))),
             Err(e) => Err(e),
         }

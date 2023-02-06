@@ -35,7 +35,7 @@ impl BotCommand for Node {
                 node.latitude,
                 node.longitude,
                 match node.connection {
-                    Some(c) => format!("{}", c),
+                    Some(c) => format!("{c}"),
                     None => "none".to_string(),
                 }
             ))),

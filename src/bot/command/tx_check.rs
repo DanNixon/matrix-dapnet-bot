@@ -25,23 +25,20 @@ impl BotCommand for TxCheck {
         Ok(RoomMessageEventContent::text_markdown(match &self.callsign {
             Some(callsign) => match config.check_user_can_transmit(&sender, callsign) {
                 Some(user) => format!(
-                    "Congrats {}, you are configured to transmit using the following callsigns: {}",
-                    sender,
+                    "Congrats {sender}, you are configured to transmit using the following callsigns: {}",
                     user.callsigns.iter().format(", ")
                 ),
                 None => format!(
-                    "Sorry {}, you are not configured to transmit with callsign {}.",
-                    sender, callsign
+                    "Sorry {sender}, you are not configured to transmit with callsign {callsign}.",
                 ),
             },
             None => match config.get_user(&sender) {
                 Some(user) => format!(
-                    "Congrats {}, you are configured to transmit using the following callsigns: {}",
-                    sender, user.callsigns.iter().format(", ")
+                    "Congrats {sender}, you are configured to transmit using the following callsigns: {}",
+                    user.callsigns.iter().format(", ")
                 ),
                 None => format!(
-                    "Sorry {}, I'm afraid I do not know you, if you hold an ameatur radio license speak to an operator of this bot to be allowed to transmit.",
-                    sender
+                    "Sorry {sender}, I'm afraid I do not know you, if you hold an ameatur radio license speak to an operator of this bot to be allowed to transmit.",
                 ),
             }
         }))
