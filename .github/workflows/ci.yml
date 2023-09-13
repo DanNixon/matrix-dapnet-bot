@@ -16,32 +16,35 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-
-      - name: Setup
-        run: rustup component add clippy rustfmt
+      - uses: cachix/install-nix-action@v20
 
       - name: Format
-        run: cargo fmt -- --check
+        run: nix build -L .#fmt
 
       - name: Clippy
-        run: cargo clippy -- -Dwarnings
+        run: nix build -L .#clippy
 
-  build-and-test:
-    name: Build and Test
+      - name: Test
+        run: nix build -L .#test
+
+  build:
+    name: Build
+    needs:
+      - formatting-and-quality
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v1
+      - uses: cachix/install-nix-action@v20
 
-      - name: Build and Test
-        run: cargo test
+      - name: Build
+        run: nix build -L
 
   container-image:
     name: Build and push container image
     if: ${{ github.ref_name == 'main' || github.ref_type == 'tag' }}
     needs:
-      - build-and-test
-      - formatting-and-quality
+      - build
     runs-on: ubuntu-latest
 
     steps:
