@@ -44,28 +44,6 @@
             buildInputs = buildInputs;
           };
 
-          container-image = pkgs.dockerTools.buildImage {
-            name = "matrix-dapnet-bot";
-            tag = "latest";
-            created = "now";
-
-            copyToRoot = pkgs.buildEnv {
-              name = "image-root";
-              paths = [ pkgs.tini packages.default ];
-              pathsToLink = [ "/bin" ];
-            };
-
-            config = {
-              Entrypoint = [ "/bin/tini" "--" "/bin/matrix-dapnet-bot" ];
-              ExposedPorts = {
-                "9090/tcp" = {};
-              };
-              Env = [
-                "OBSERVABILITY_ADDRESS=0.0.0.0:9090"
-              ];
-            };
-          };
-
           fmt = naersk'.buildPackage {
             src = ./.;
             nativeBuildInputs = nativeBuildInputs;
