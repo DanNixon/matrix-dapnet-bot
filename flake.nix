@@ -7,7 +7,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    naersk.url = "github:nix-community/naersk";
+    naersk = {
+      url = "github:nix-community/naersk";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { self, nixpkgs, flake-utils, fenix, naersk }:
