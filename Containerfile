@@ -1,4 +1,4 @@
-FROM docker.io/library/rust:alpine3.15 as builder
+FROM docker.io/library/rust:alpine3.17 as builder
 
 RUN apk add \
   cmake \
@@ -12,7 +12,7 @@ RUN RUSTFLAGS=-Ctarget-feature=-crt-static cargo install \
   --path . \
   --root /usr/local
 
-FROM docker.io/library/alpine:3.15
+FROM docker.io/library/alpine:3.17
 
 RUN apk add \
   libgcc \
