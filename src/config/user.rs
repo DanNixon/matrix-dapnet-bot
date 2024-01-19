@@ -26,6 +26,6 @@ impl User {
     }
 
     pub(crate) fn get_default_callsign(&self) -> Option<&Callsign> {
-        self.callsigns.get(0)
+        self.callsigns.first()
     }
 }
